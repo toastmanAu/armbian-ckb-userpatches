@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Name=Neuron Wallet
+Comment=CKB Neuron wallet (full node)
+Exec=/opt/Neuron.AppImage
+Icon=/usr/share/pixmaps/neuron-icon.png
+Type=Application
+Categories=Network;Finance;
+StartupNotify=true

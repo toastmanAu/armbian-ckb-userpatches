@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Name=CKB Status
+Comment=Quick CKB node status check
+Exec=xfce4-terminal --title="CKB Status" --command="ckb-status" --hold
+Icon=/usr/share/pixmaps/ckb-icon.png
+Type=Application
+Categories=Network;
+StartupNotify=false

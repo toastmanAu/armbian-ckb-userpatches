@@ -1,0 +1,17 @@
+[Unit]
+Description=CKB Node First-Boot Setup Wizard
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=!/etc/ckb/node.env
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/ckb-firstboot.sh
+StandardInput=tty
+TTYPath=/dev/tty1
+TTYReset=yes
+TTYVHangup=yes
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

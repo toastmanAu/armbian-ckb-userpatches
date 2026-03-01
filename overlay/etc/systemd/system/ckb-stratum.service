@@ -1,0 +1,14 @@
+[Unit]
+Description=CKB Stratum Proxy
+After=ckb.service
+Wants=ckb.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/ckb-stratum
+ExecStart=/usr/bin/node proxy.js
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

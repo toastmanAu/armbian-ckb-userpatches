@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Name=Fiber Network
+Comment=Fiber payment channel node UI
+Exec=chromium --app=http://localhost:9090 --new-window
+Icon=/usr/share/pixmaps/fiber-icon.png
+Type=Application
+Categories=Network;
+StartupNotify=false

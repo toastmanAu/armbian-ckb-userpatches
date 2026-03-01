@@ -1,0 +1,41 @@
+#!/bin/bash
+# CKB node health check — auto-restart stalled node, alert on low peers
+
+CKB_RPC="http://localhost:8114"
+MIN_PEERS=3
+STALL_MINUTES=30
+
+get_block() {
+    curl -sf "$CKB_RPC" -X POST -H 'Content-Type: application/json' \
+        -d '{"jsonrpc":"2.0","method":"get_tip_block_number","params":[],"id":1}' \
+        2>/dev/null | jq -r '.result // "0"' | xargs printf '%d\n' 2>/dev/null || echo 0
+}
+
+get_peers() {
+    curl -sf "$CKB_RPC" -X POST -H 'Content-Type: application/json' \
+        -d '{"jsonrpc":"2.0","method":"get_peers","params":[],"id":1}' \
+        2>/dev/null | jq '.result | length' 2>/dev/null || echo 0
+}
+
+STATE_FILE="/tmp/ckb-health-state"
+NOW=$(date +%s)
+CURRENT_BLOCK=$(get_block)
+PEERS=$(get_peers)
+
+if [[ -f "$STATE_FILE" ]]; then
+    LAST_BLOCK=$(cat "$STATE_FILE" | jq -r '.block')
+    LAST_TIME=$(cat "$STATE_FILE" | jq -r '.time')
+    ELAPSED=$(( (NOW - LAST_TIME) / 60 ))
+
+    if [[ "$CURRENT_BLOCK" == "$LAST_BLOCK" && "$ELAPSED" -ge "$STALL_MINUTES" ]]; then
+        logger -t ckb-health "Block stalled at $CURRENT_BLOCK for ${ELAPSED}min — restarting ckb"
+        systemctl restart ckb
+    fi
+
+    if [[ "$PEERS" -lt "$MIN_PEERS" ]]; then
+        logger -t ckb-health "Low peers: $PEERS (min: $MIN_PEERS) — restarting ckb"
+        systemctl restart ckb
+    fi
+fi
+
+echo "{\"block\":\"$CURRENT_BLOCK\",\"peers\":$PEERS,\"time\":$NOW}" > "$STATE_FILE"

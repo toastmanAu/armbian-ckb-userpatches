@@ -1,0 +1,22 @@
+#!/bin/bash
+# Quick CKB node status — launch from desktop panel
+
+CKB_RPC="http://localhost:8114"
+
+rpc() { curl -sf "$CKB_RPC" -X POST -H 'Content-Type: application/json' -d "$1" 2>/dev/null; }
+
+BLOCK=$(rpc '{"jsonrpc":"2.0","method":"get_tip_block_number","params":[],"id":1}' | jq -r '.result // "?"' | xargs printf '%d\n')
+PEERS=$(rpc '{"jsonrpc":"2.0","method":"get_peers","params":[],"id":1}' | jq '.result | length' 2>/dev/null || echo "?")
+SYNC=$(rpc '{"jsonrpc":"2.0","method":"sync_state","params":[],"id":1}' | jq -r '.result.sync_progress // "?"')
+
+echo ""
+echo "  ╔═══════════════════════════════╗"
+echo "  ║       CKB Node Status         ║"
+echo "  ╠═══════════════════════════════╣"
+printf "  ║  Block:    %-19s║\n" "$BLOCK"
+printf "  ║  Peers:    %-19s║\n" "$PEERS"
+printf "  ║  Sync:     %-19s║\n" "$SYNC"
+echo "  ╚═══════════════════════════════╝"
+echo ""
+echo "  Press any key to close..."
+read -n1

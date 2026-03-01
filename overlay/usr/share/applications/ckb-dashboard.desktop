@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Name=CKB Dashboard
+Comment=CKB Node live dashboard
+Exec=chromium --app=http://localhost:8080 --new-window
+Icon=/usr/share/pixmaps/ckb-icon.png
+Type=Application
+Categories=Network;
+StartupNotify=false

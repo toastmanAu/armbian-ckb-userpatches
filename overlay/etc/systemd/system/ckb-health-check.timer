@@ -1,0 +1,10 @@
+[Unit]
+Description=CKB Health Check Timer
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

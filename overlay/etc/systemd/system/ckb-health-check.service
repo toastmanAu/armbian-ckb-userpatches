@@ -1,0 +1,7 @@
+[Unit]
+Description=CKB Node Health Check
+After=ckb.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/ckb-health-check

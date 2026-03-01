@@ -1,0 +1,16 @@
+[Unit]
+Description=CKB Node Dashboard
+After=ckb.service
+Wants=ckb.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/ckb-dashboard
+ExecStart=/usr/bin/node server.js
+Restart=on-failure
+RestartSec=5
+Environment=PORT=8080
+Environment=CKB_RPC=http://localhost:8114
+
+[Install]
+WantedBy=multi-user.target

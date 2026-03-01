@@ -1,0 +1,16 @@
+[Unit]
+Description=CKB Full Node
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ckb
+WorkingDirectory=/var/lib/ckb
+ExecStart=/usr/local/bin/ckb run
+Restart=on-failure
+RestartSec=10
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

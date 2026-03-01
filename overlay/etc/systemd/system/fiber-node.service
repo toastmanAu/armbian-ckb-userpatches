@@ -1,0 +1,16 @@
+[Unit]
+Description=Fiber Network Node
+After=ckb.service
+Wants=ckb.service
+
+[Service]
+Type=simple
+WorkingDirectory=/var/lib/fiber
+ExecStartPre=/bin/sh -c 'pkill -9 fnn || true && rm -f /var/lib/fiber/fiber.db.lock'
+ExecStart=/usr/local/bin/fnn run --config /etc/fiber/fnn.toml
+Restart=on-failure
+RestartSec=15
+EnvironmentFile=-/etc/ckb/node.env
+
+[Install]
+WantedBy=multi-user.target
