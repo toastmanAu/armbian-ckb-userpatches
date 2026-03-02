@@ -2,14 +2,18 @@
 Description=CKB Full Node
 After=network-online.target
 Wants=network-online.target
+StartLimitIntervalSec=0
 
 [Service]
 Type=simple
 User=ckb
 WorkingDirectory=/var/lib/ckb
-ExecStart=/usr/local/bin/ckb run
+ExecStart=/usr/local/bin/ckb run --indexer
 Restart=on-failure
-RestartSec=10
+RestartSec=15
+# No WatchdogSec — CKB uses Type=simple and does not send sd_notify pings.
+# Setting WatchdogSec causes systemd to kill the node on a fixed interval
+# regardless of whether it's actually healthy. Leave it unset.
 LimitNOFILE=65536
 
 [Install]
