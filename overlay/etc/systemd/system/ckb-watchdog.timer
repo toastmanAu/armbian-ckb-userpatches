@@ -1,0 +1,10 @@
+[Unit]
+Description=CKB Watchdog — check every 5 minutes
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=5min
+AccuracySec=30
+
+[Install]
+WantedBy=timers.target

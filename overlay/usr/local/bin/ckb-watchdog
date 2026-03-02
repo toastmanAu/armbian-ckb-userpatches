@@ -1,0 +1,51 @@
+#!/bin/bash
+# ckb-watchdog — Checks that CKB block height is advancing.
+# Runs every 5 min via systemd timer. Restarts ckb.service if stuck.
+
+STATE=/var/lib/ckb/.watchdog-state
+RPC_PORT=${CKB_RPC_PORT:-8114}
+LOGPFX="ckb-watchdog:"
+
+get_tip() {
+    curl -sf --max-time 5 \
+        -H "Content-Type: application/json" \
+        -d '{"jsonrpc":"2.0","method":"get_tip_block_number","params":[],"id":1}' \
+        "http://127.0.0.1:${RPC_PORT}" 2>/dev/null \
+        | python3 -c "import sys,json; d=json.load(sys.stdin); print(int(d['result'],16))" 2>/dev/null
+}
+
+mkdir -p "$(dirname $STATE)"
+NOW=$(date +%s)
+HEIGHT=$(get_tip)
+
+if [ -z "$HEIGHT" ]; then
+    echo "$LOGPFX RPC unreachable on port $RPC_PORT — skipping check"
+    if [ -f "$STATE" ]; then
+        LAST_OK=$(grep "last_ok=" "$STATE" 2>/dev/null | cut -d= -f2)
+        if [ -n "$LAST_OK" ] && [ $(( NOW - LAST_OK )) -gt 600 ]; then
+            echo "$LOGPFX RPC down for >10 min — restarting ckb.service"
+            systemctl restart ckb
+            echo "last_ok=$NOW" > "$STATE"
+            echo "last_height=0" >> "$STATE"
+        fi
+    fi
+    exit 0
+fi
+
+PREV_HEIGHT=$(grep "last_height=" "$STATE" 2>/dev/null | cut -d= -f2)
+PREV_TIME=$(grep "last_ok=" "$STATE" 2>/dev/null | cut -d= -f2)
+
+if [ -n "$PREV_HEIGHT" ] && [ "$HEIGHT" -eq "$PREV_HEIGHT" ] && [ -n "$PREV_TIME" ]; then
+    STUCK_FOR=$(( NOW - PREV_TIME ))
+    echo "$LOGPFX block height stuck at $HEIGHT for ${STUCK_FOR}s"
+    if [ $STUCK_FOR -gt 600 ]; then
+        echo "$LOGPFX stuck >10 min — restarting ckb.service"
+        systemctl restart ckb
+        echo "last_ok=$NOW" > "$STATE"
+        echo "last_height=$HEIGHT" >> "$STATE"
+    fi
+else
+    echo "$LOGPFX block height $HEIGHT (was ${PREV_HEIGHT:-n/a}) — healthy"
+    echo "last_ok=$NOW" > "$STATE"
+    echo "last_height=$HEIGHT" >> "$STATE"
+fi
